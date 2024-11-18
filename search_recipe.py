@@ -54,9 +54,8 @@ def search_recipe_by_title(query, conn):
     results = client.search(
         collection_name="titles_collection",
         query_vector=query_embedding,
-        limit=3
+        limit=5
     )
-
     formated_results = []
     for result in results:
         recipe_result = fetch_recipe_from_db(result.id, cursor)
@@ -66,23 +65,6 @@ def search_recipe_by_title(query, conn):
             print(f"Title: {result.payload['title']}, Score: {result.score}, Recipe: {recipe_result[0][1]}")
 
     return formated_results
-
-
-def search_recipe_by_ingredient_vector(query, conn):
-    cursor = conn.cursor()
-    query_embedding = model.encode([query]).tolist()[0]
-
-    results = client.search(
-        collection_name="ingredients_collection",
-        query_vector=query_embedding,
-        limit=10
-    )
-
-    # Fix multiple returns of same report, although they can have different score
-    for result in results:
-        recipe_result = fetch_recipe_from_db(result.id, cursor)
-        if recipe_result:
-            print(f"Title: {result.payload['title']}, Score: {result.score}, Recipe: {recipe_result[0][1]}")
 
 
 db_pool = None
@@ -142,9 +124,11 @@ if __name__ == "__main__":
     parser.add_argument("--dbname", type=str, help="Database name", required=True)
     parser.add_argument("--dbuser", type=str, help="Database user", required=True)
     parser.add_argument("--dbpwd", type=str, help="Database password", required=True)
+    parser.add_argument("--qdranthost", type=str, help="Qdrant server host", required=True)
+    parser.add_argument("--qdrantport", type=str, help="Qdrant server port", required=True)
 
     args = parser.parse_args()
-    client = QdrantClient(host="localhost", port=6333)
+    client = QdrantClient(host=args.qdranthost, port=args.qdrantport)
     model = SentenceTransformer('all-MiniLM-L6-v2')
 
     import uvicorn

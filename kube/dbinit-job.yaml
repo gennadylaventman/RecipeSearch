@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dbinit-job
+spec:
+  backoffLimit: 0  # Prevent retries on failure
+  template:
+    metadata:
+      labels:
+        app: dbinit
+    spec:
+      restartPolicy: Never  # Do not restart the pod
+      containers:
+        - name: dbinit
+          image: lgennady/my-recipe-search-app-init:latest
+          command: ["/bin/bash", "/app/run_init_tasks.sh"]
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_PASSWORD

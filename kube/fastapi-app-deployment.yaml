@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-app
+  template:
+    metadata:
+      labels:
+        app: fastapi-app
+    spec:
+      containers:
+        - name: fastapi
+          image: lgennady/my-recipe-search-app:latest
+          command:
+            - "python"
+            - "search_recipe.py"
+            - "--dbhost"
+            - "postgres"
+            - "--dbport"
+            - "5432"
+            - "--dbname"
+            - "$(POSTGRES_DB)"
+            - "--dbuser"
+            - "$(POSTGRES_USER)"
+            - "--dbpwd"
+            - "$(POSTGRES_PASSWORD)"
+            - "--qdranthost"
+            - "qdrant"
+            - "--qdrantport"
+            - "6333"
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 8000

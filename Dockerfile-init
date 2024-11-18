@@ -1,0 +1,8 @@
+# Use the existing base image
+FROM lgennady/my-recipe-search-app:latest
+
+# Copy the script to the image
+COPY run_init_tasks.sh /app/run_init_tasks.sh
+
+# Ensure the script is executable
+RUN chmod +x /app/run_init_tasks.sh
