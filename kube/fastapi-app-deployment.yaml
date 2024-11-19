@@ -32,6 +32,8 @@ spec:
             - "qdrant"
             - "--qdrantport"
             - "6333"
+            - "--host"
+            - "0.0.0.0"
           env:
             - name: POSTGRES_DB
               valueFrom:
