@@ -12,6 +12,13 @@ spec:
       labels:
         app: postgres
     spec:
+      initContainers:
+        - name: init-volume
+          image: busybox
+          command: ["sh", "-c", "mkdir -p /var/lib/postgresql/data && chown -R 999:999 /var/lib/postgresql/data"]
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql
       containers:
         - name: postgres
           image: postgres:14
@@ -35,7 +42,7 @@ spec:
             - containerPort: 5432
           volumeMounts:
             - name: postgres-storage
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:

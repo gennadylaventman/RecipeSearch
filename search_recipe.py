@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends
 from psycopg2.pool import SimpleConnectionPool
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
+from qdrant_client.http.exceptions import UnexpectedResponse
 
 
 def search_ingredients_in_db(query_words, cursor):
@@ -34,7 +35,7 @@ def fetch_recipe_from_db(recipe_id, cursor):
 
 def search_recipe_by_ingredient(query, conn):
     cursor = conn.cursor()
-    query_words = query.split()
+    query_words = query.lower().split()
     results = search_ingredients_in_db(query_words, cursor)
 
     formated_results = []
@@ -51,11 +52,15 @@ def search_recipe_by_ingredient(query, conn):
 def search_recipe_by_title(query, conn):
     cursor = conn.cursor()
     query_embedding = model.encode([query]).tolist()[0]
-    results = client.search(
-        collection_name="titles_collection",
-        query_vector=query_embedding,
-        limit=5
-    )
+    try:
+        results = client.search(
+            collection_name="titles_collection",
+            query_vector=query_embedding,
+            limit=5
+        )
+    except UnexpectedResponse as e:
+        return e.reason_phrase
+
     formated_results = []
     for result in results:
         recipe_result = fetch_recipe_from_db(result.id, cursor)

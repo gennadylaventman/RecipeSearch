@@ -12,7 +12,7 @@ spec:
       restartPolicy: Never  # Do not restart the pod
       containers:
         - name: dbinit
-          image: lgennady/my-recipe-search-app-init:latest
+          image: lgennady/my-recipe-search-app:latest
           command: ["/bin/bash", "/app/run_init_tasks.sh"]
           env:
             - name: POSTGRES_DB
